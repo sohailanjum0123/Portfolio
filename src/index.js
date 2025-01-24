@@ -3,16 +3,16 @@ import dotenv from "dotenv";
 
 import express from "express";
 import connectDataBase from "./database/database.js";
-const app = express();
+import { app } from "./app.js";
 
 
 dotenv.config({
-    path: './env'
+    path: './.env'
 })
 
 connectDataBase()
 .then(()=>{
-    app.listen(process.env.PORT || 8000, ()=>{
+    app.listen(process.env.PORT, ()=>{
         console.log(` Server is running at port : ${process.env.PORT}`);
     })
 })
