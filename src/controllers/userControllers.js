@@ -83,14 +83,14 @@ const registerUser = asyncHnadler(async (req, res) => {
     .json(new apiResponse(200, createdUser, "User Register Successfully"));
 });
 
-const loginUser = asyncHnadler(async (req, res, next) => {
+const loginUser = asyncHnadler(async (req, res) => {
   const { userName, email, password } = req.body;
   if (!(userName || email)) {
     throw new apiError(400, "Please enter userDetail");
   }
 
   const user = await User.findOne({
-    $or: [{ userName, email }],
+    $or: [{ userName: userName},{ email: email }],
   });
 
   if (!user) {
@@ -120,7 +120,7 @@ const loginUser = asyncHnadler(async (req, res, next) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-      new apiResponse(200, { user: loggedInUser, accessToken, refreshToken })
+      new apiResponse(200,{} , "User Logged in")
     );
 });
 
@@ -189,4 +189,31 @@ const refreshAccessToken = asyncHnadler(async(req,res)=>{
 
 })
 
-export { registerUser, loginUser, logoutUser,refreshAccessToken };
+
+const searchUser = asyncHnadler(async(req,res)=>{
+      try {
+      const {keyword} = req.query;
+
+      const filters = {  }
+      if(keyword){
+        filters.$or = [
+          {userName: { $regex: keyword, $options:"i"}},
+          {email: {$regex: keyword, $options: "i"}}
+        ]
+      }
+
+      const user = await User.find(filters);
+      return res.status(200).json(
+        new apiResponse(200,{
+          user
+        })
+      )
+
+
+      } catch (error) {
+        throw new apiError(500,`Searching Server Error:${error.message}`)
+      }
+})
+
+
+export { registerUser, loginUser, logoutUser,refreshAccessToken, searchUser };
